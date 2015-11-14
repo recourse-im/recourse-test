@@ -93,6 +93,7 @@ sub start
 
    my ( $db_type, %db_args, $db_config );
    if( -f $db_config_abs_path ) {
+      $output->diag("Loading database configuration from $db_config_abs_path");
       $db_config = YAML::LoadFile( $db_config_abs_path );
       if( $db_config->{name} eq "psycopg2") {
           $db_type = "pg";
@@ -107,6 +108,8 @@ sub start
       }
    }
    else {
+      $output->diag("Writing default database configuration to ".
+                    $db_config_path);
       $db_type = "sqlite";
       $db_args{path} = $db;
       $db_config = { name => "sqlite3", args => { database => $db } };
