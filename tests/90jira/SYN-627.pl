@@ -9,22 +9,27 @@ test "Events come down the correct room",
          matrix_create_room( $user )
          ->on_done( sub {
             my ( $room_id ) = @_;
-
+            log_if_fail("Registered new room $room_id");
             push @rooms, $room_id;
          });
       } 1 .. 30 )
       ->then( sub {
          matrix_sync( $user );
       })->then( sub {
+         log_if_fail("First sync body", $_[0]);
          Future->needs_all( map {
             my $room_id = $_;
 
-            matrix_send_room_text_message( $user, $room_id, body => "$room_id" );
+            matrix_send_room_text_message( $user, $room_id, body => "$room_id" )
+            ->on_done( sub {
+                log_if_fail("Sent message in room $room_id");
+            });
          } @rooms );
       })->then( sub {
          matrix_sync_again( $user );
       })->then( sub {
          my ( $body ) = @_;
+         log_if_fail("Second sync body", $body);
          my $room_id;
 
          foreach $room_id ( @rooms ) {
